@@ -3,6 +3,9 @@ package com.a2z;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * @author Chetanand Meher
+ */
 @SpringBootApplication
 public class EcommerceMultivendorApplication {
 

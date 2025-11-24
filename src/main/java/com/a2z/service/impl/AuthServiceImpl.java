@@ -3,9 +3,11 @@ package com.a2z.service.impl;
 import com.a2z.config.JwtProvider;
 import com.a2z.enums.USER_ROLE;
 import com.a2z.model.Cart;
+import com.a2z.model.Seller;
 import com.a2z.model.User;
 import com.a2z.model.VerificationCode;
 import com.a2z.repository.CartRepository;
+import com.a2z.repository.SellerRepository;
 import com.a2z.repository.UserRepository;
 import com.a2z.repository.VerificationCodeRepository;
 import com.a2z.request.LoginRequest;
@@ -13,6 +15,7 @@ import com.a2z.response.AuthResponse;
 import com.a2z.response.SignupRequest;
 import com.a2z.service.AuthService;
 import com.a2z.service.EmailService;
+import com.a2z.utils.OtpUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +23,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthoritiesContainer;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +48,9 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final CustomUserServiceImpl customUserService;
     private static final Logger log =LoggerFactory.getLogger(CustomUserServiceImpl.class);
-
+    private final SellerRepository sellerRepository;
+    private static final String SELLER_PREFIX = "seller_";
+    private static final String SIGNING_PREFIX = "signing_";
     @Override
     public String createUser(SignupRequest req) throws Exception {
 
@@ -87,20 +90,30 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * @param email
+     * @param role
      * @throws Exception
      */
     @Override
-    public void sendLoginOtp(String email) throws Exception {
-        String SIGNING_PREFIX = "signing_";
+    public void sendLoginOtp(String email, USER_ROLE role) throws Exception {
 
-        log.info("email in login Otp: {}", email);
+        log.info("email in login Otp: {}",  email)
+        ;
         if (email.startsWith(SIGNING_PREFIX)) {
             email = email.substring(SIGNING_PREFIX.length());
 
-            User user = userRepository.findByEmail(email);
-            if (user == null) {
-                throw new Exception("User not found with email: " + email);
+            if (role.equals(USER_ROLE.SELLER)){
+                Seller seller = sellerRepository.findByEmail(email);
+                if (seller == null) {
+                    throw new Exception("Seller not found with email: " + email);
+                }
             }
+            else{
+                User user = userRepository.findByEmail(email);
+                if (user == null) {
+                    throw new Exception("User not found with email: " + email);
+                }
+            }
+
         }
         // Generate OTP
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(email);
@@ -108,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
             verificationCodeRepository.delete(verificationCode);
         }
 
-        String otp = com.a2z.utils.OtpUtil.generateOtp();
+        String otp = OtpUtil.generateOtp();
         VerificationCode newVerificationCode = VerificationCode.builder()
                 .email(email)
                 .otp(otp)
@@ -128,7 +141,7 @@ public class AuthServiceImpl implements AuthService {
      * @throws Exception
      */
     @Override
-    public AuthResponse loginUser(LoginRequest req) throws Exception {
+    public AuthResponse     loginUser(LoginRequest req) throws Exception {
         String username = req.getEmail();
         String otp = req.getOtp();
 
@@ -155,8 +168,8 @@ public class AuthServiceImpl implements AuthService {
         if (userDetails == null) {
             throw new BadCredentialsException("Invalid username");
         }
-
-        VerificationCode verificationCode = verificationCodeRepository.findByEmail(username);
+        String actualUsername = username.substring(SELLER_PREFIX.length());
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(actualUsername);
         if (verificationCode == null || !verificationCode.getOtp().equals(otp)) {
             throw new BadCredentialsException("Invalid OTP");
         }

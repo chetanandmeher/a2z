@@ -3,6 +3,9 @@ package com.a2z.model;
 import jakarta.persistence.Entity;
 import lombok.*;
 
+/**
+ * @author Chetanand Meher
+ */
 @Getter
 @Setter
 @Builder

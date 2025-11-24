@@ -3,6 +3,7 @@ package com.a2z.service.impl;
 import com.a2z.config.JwtProvider;
 import com.a2z.model.User;
 import com.a2z.repository.UserRepository;
+import com.a2z.response.UserResponseDto;
 import com.a2z.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,11 @@ public class UserServiceImpl  implements UserService {
 
 
     @Override
-    public User findUserByJwt(String jwt) throws Exception {
+    public UserResponseDto findUserByJwt(String jwt) throws Exception {
         String email = jwtProvider.getEmailFromJwt(jwt);
 
-        return this.findUserByEmail(email);
+        User user = this.findUserByEmail(email);
+        return convertUserToUserResponseDto(user);
     }
 
 
@@ -34,5 +36,17 @@ public class UserServiceImpl  implements UserService {
         }
 
         return user;
+    }
+
+    private UserResponseDto convertUserToUserResponseDto(User user){
+        return UserResponseDto.builder()
+                .role(user.getRole())
+                .addresses(user.getAddresses())
+                .usedCoupons(user.getUsedCoupons())
+                .mobile(user.getMobile())
+                .lastName(user.getLastName())
+                .firstName(user.getFirstName())
+                .email(user.getEmail())
+                .build();
     }
 }

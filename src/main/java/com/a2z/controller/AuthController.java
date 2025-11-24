@@ -1,9 +1,9 @@
 package com.a2z.controller;
 
 import com.a2z.enums.USER_ROLE;
-import com.a2z.model.User;
 import com.a2z.model.VerificationCode;
 import com.a2z.repository.UserRepository;
+import com.a2z.request.LoginOtpRequest;
 import com.a2z.request.LoginRequest;
 import com.a2z.response.ApiResponse;
 import com.a2z.response.AuthResponse;
@@ -40,9 +40,10 @@ public class AuthController {
     }
 
     @PostMapping("/sent/login-signup-otp")
-    public ResponseEntity<ApiResponse> sentOtpHandler(@RequestBody VerificationCode verificationCode) throws Exception {
+    public ResponseEntity<ApiResponse> sentOtpHandler(
+            @RequestBody LoginOtpRequest request) throws Exception {
 
-        authService.sendLoginOtp(verificationCode.getEmail());
+        authService.sendLoginOtp(request.getEmail(), request.getRole());
 
         ApiResponse response = ApiResponse.builder()
                 .message("OTP sent to email successfully")

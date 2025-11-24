@@ -9,7 +9,7 @@ public enum AccountStatus {
      * Account is created but not yet verified.
      * Initial state for newly created accounts pending verification.
      */
-    PENDING_VERIFICATION,
+    PENDING,
 
     /**
      * Account is active and in good standing.

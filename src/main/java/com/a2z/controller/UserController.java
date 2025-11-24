@@ -2,6 +2,7 @@ package com.a2z.controller;
 
 import com.a2z.model.User;
 import com.a2z.repository.UserRepository;
+import com.a2z.response.UserResponseDto;
 import com.a2z.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,11 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users/profile")
-    public ResponseEntity<User> getUserProfile(@RequestHeader("Authorization") String jwt) throws Exception {
+    public ResponseEntity<UserResponseDto> getUserProfile(@RequestHeader("Authorization") String jwt) throws Exception {
         // Implementation to get user profile
-        User user = userService.findUserByJwt(jwt);
-        return ResponseEntity.ok(user);
+        UserResponseDto userResponseDto = userService.findUserByJwt(jwt);
+        return ResponseEntity.ok(userResponseDto);
+
     }
 
 }
