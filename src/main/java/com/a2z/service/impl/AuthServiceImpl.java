@@ -96,8 +96,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void sendLoginOtp(String email, USER_ROLE role) throws Exception {
 
-        log.info("email in login Otp: {}",  email)
-        ;
+        log.info("email in login Otp: {}",  email);
+
         if (email.startsWith(SIGNING_PREFIX)) {
             email = email.substring(SIGNING_PREFIX.length());
 
@@ -113,7 +113,6 @@ public class AuthServiceImpl implements AuthService {
                     throw new Exception("User not found with email: " + email);
                 }
             }
-
         }
         // Generate OTP
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(email);
@@ -141,7 +140,7 @@ public class AuthServiceImpl implements AuthService {
      * @throws Exception
      */
     @Override
-    public AuthResponse     loginUser(LoginRequest req) throws Exception {
+    public AuthResponse loginUser(LoginRequest req) throws Exception {
         String username = req.getEmail();
         String otp = req.getOtp();
 
@@ -166,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = customUserService.loadUserByUsername(username);
 
         if (userDetails == null) {
-            throw new BadCredentialsException("Invalid username");
+            throw new BadCredentialsException("Invalid username!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
         String actualUsername = username.substring(SELLER_PREFIX.length());
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(actualUsername);
