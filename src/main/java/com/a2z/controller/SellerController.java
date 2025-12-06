@@ -2,6 +2,7 @@ package com.a2z.controller;
 
 
 import com.a2z.enums.AccountStatus;
+import com.a2z.exception.SellerException;
 import com.a2z.model.Seller;
 import com.a2z.model.SellerReport;
 import com.a2z.model.VerificationCode;
@@ -91,23 +92,22 @@ public class SellerController {
         String frontendUrl = "http://localhost:3000/verify-seller/";
 
         emailService.sendVerificationOtpEmail(email, newVerificationCode.getOtp(), subject, body  + frontendUrl);
-        return new ResponseEntity("Email Verification OTP sent successfully",  HttpStatus.OK);
+        return new ResponseEntity<>("Email Verification OTP sent successfully",  HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws RuntimeException {
+    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws SellerException {
         Seller seller = sellerService.getSellerById(id);
         return ResponseEntity.ok(seller);
     }
 
 
     @GetMapping("/profile")
-    public ResponseEntity<Seller> getSellerProfile(
-            @RequestHeader("Authorization") String jwt) throws Exception {
+    public ResponseEntity<Seller> getSellerProfile(@RequestHeader("Authorization") String jwt) throws Exception {
 
-        log.info("****************JWT in getSellerProfile: {}", jwt);
+        log.info("****************JWT in getSellerProfile: \n{}", jwt);
 
-        Seller seller = sellerService.getSellerProfileByJwt(jwt.substring(7));
+        Seller seller = sellerService.getSellerProfileByJwt(jwt);
         return ResponseEntity.ok(seller);
     }
 

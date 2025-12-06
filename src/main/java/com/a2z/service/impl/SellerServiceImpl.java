@@ -3,6 +3,7 @@ package com.a2z.service.impl;
 import com.a2z.config.JwtProvider;
 import com.a2z.enums.AccountStatus;
 import com.a2z.enums.USER_ROLE;
+import com.a2z.exception.SellerException;
 import com.a2z.model.Address;
 import com.a2z.model.Seller;
 import com.a2z.repository.AddressRepository;
@@ -28,6 +29,7 @@ public class SellerServiceImpl implements SellerService {
     @Override
     public Seller getSellerProfileByJwt(String jwt) {
         String email = jwtProvider.getEmailFromJwt(jwt);
+        System.out.println("Extracted email from JWT: " + email);
         return sellerRepository.findByEmail(email);
     }
 
@@ -58,9 +60,9 @@ public class SellerServiceImpl implements SellerService {
 
 
     @Override
-    public Seller getSellerById(Long id) {
+    public Seller getSellerById(Long id) throws SellerException {
         return sellerRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Seller not found with id: " + id));
+                .orElseThrow(()-> new SellerException("Seller not found with id: " + id));
     }
 
 
@@ -144,7 +146,7 @@ public class SellerServiceImpl implements SellerService {
      * @param id
      */
     @Override
-    public void deleteSeller(Long id) {
+    public void deleteSeller(Long id) throws SellerException {
         Seller existingSeller = this.getSellerById(id);
         sellerRepository.delete(existingSeller);
     }
@@ -168,7 +170,7 @@ public class SellerServiceImpl implements SellerService {
      * @return
      */
     @Override
-    public Seller updateSellerAccountStatus(Long sellerId, AccountStatus status) {
+    public Seller updateSellerAccountStatus(Long sellerId, AccountStatus status) throws SellerException {
          Seller seller = getSellerById(sellerId);
          seller.setAccountStatus(status);
         return sellerRepository.save(seller);
