@@ -116,7 +116,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> getAllProducts(String category, String brand, String colors, String sizes, Integer minPrice, Integer maxPrice, String sort, Integer minDiscountPercentage, String stock, Integer pageNumber) {
+    public Page<Product> getAllProducts(String category, String brand,
+                                        String colors, String sizes,
+                                        Integer minPrice, Integer maxPrice,
+                                        String sort, Integer minDiscountPercentage,
+                                        String stock, Integer pageNumber) {
         Specification<Product> spec = (root, query, criteriaBuilder) ->{
             List<Predicate> predicates = new ArrayList<>();
 

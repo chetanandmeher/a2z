@@ -1,3 +1,6 @@
+
+
+
 # A2Z - Multi-Vendor E-Commerce Platform
 
 ![Java](https://img.shields.io/badge/Java-17-orange)
@@ -61,10 +64,22 @@ A modern, scalable, and production-ready Spring Boot e-commerce platform designe
 ### Seller Features
 - ✅ Seller registration and account management
 - ✅ Business details and bank account information
-- ✅ Product catalog management (CRUD operations)
+- ✅ Product catalog management (CRUD operations via SellerProductController)
+  - ✅ Create new products with hierarchical categories
+  - ✅ View all seller products
+  - ✅ Update product details (title, pricing, variants)
+  - ✅ Delete products from catalog
 - ✅ Inventory/Stock management
-- ✅ Sales reports and analytics
-- ✅ Multiple product categories
+- ✅ Sales reports and analytics (via SellerReport)
+  - ✅ Total earnings tracking
+  - ✅ Total sales count
+  - ✅ Refund tracking
+  - ✅ Tax calculation
+  - ✅ Net earning calculation
+  - ✅ Order statistics (completed & cancelled)
+  - ✅ Transaction count tracking
+- ✅ Financial transaction tracking (via Transaction model)
+- ✅ Multiple product categories (3-level hierarchy)
 - ✅ Pickup address management
 
 ### Buyer Features
@@ -79,10 +94,15 @@ A modern, scalable, and production-ready Spring Boot e-commerce platform designe
 
 ### Platform Features
 - ✅ Product search and filtering by category
-- ✅ Home page banner management and deals
-- ✅ Multi-category support
+- ✅ Home page management (Home & HomeCategory)
+  - ✅ Custom banner management
+  - ✅ Featured product display
+  - ✅ Category section customization
+- ✅ Deals and promotions (Deal model)
+- ✅ Multi-category support (3-level hierarchy)
 - ✅ Order status tracking (Pending, Confirmed, Shipped, Delivered, Cancelled)
-- ✅ Payment status management
+- ✅ Payment status management with Razorpay integration
+- ✅ Financial transaction tracking and reporting
 - ✅ Centralized exception handling
 - ✅ Comprehensive logging
 
@@ -262,10 +282,13 @@ ecommerce-multivendor/
 │   │   │       │   ├── AuthController.java                # Authentication endpoints
 │   │   │       │   ├── UserController.java                # User management endpoints
 │   │   │       │   ├── SellerController.java              # Seller management endpoints
+│   │   │       │   ├── SellerProductController.java       # Seller product CRUD endpoints
+│   │   │       │   ├── ProductController.java             # Product search & filter endpoints
 │   │   │       │   └── Home.java                          # Home page endpoints
 │   │   │       ├── model/                                 # JPA Entity classes
 │   │   │       │   ├── User.java                          # User entity
 │   │   │       │   ├── Seller.java                        # Seller entity
+│   │   │       │   ├── SellerReport.java                  # Seller financial reports & analytics
 │   │   │       │   ├── Product.java                       # Product entity
 │   │   │       │   ├── Category.java                      # Category entity
 │   │   │       │   ├── Cart.java                          # Shopping cart entity
@@ -276,7 +299,12 @@ ecommerce-multivendor/
 │   │   │       │   ├── Address.java                       # User/Seller addresses
 │   │   │       │   ├── WishList.java                      # User wishlist
 │   │   │       │   ├── Coupon.java                        # Discount coupons
+│   │   │       │   ├── Deal.java                          # Special deals & promotions
+│   │   │       │   ├── Home.java                          # Home page configuration
+│   │   │       │   ├── HomeCategory.java                  # Home page category display
 │   │   │       │   ├── PaymentOrder.java                  # Payment orders
+│   │   │       │   ├── PaymentDetails.java                # Payment transaction details
+│   │   │       │   ├── Transaction.java                   # Financial transaction tracking
 │   │   │       │   ├── VerificationCode.java              # OTP verification codes
 │   │   │       │   ├── BussinessDetails.java              # Seller business info
 │   │   │       │   ├── BankDetails.java                   # Seller bank info
@@ -561,8 +589,42 @@ Authorization: Bearer <jwt_token>
 ```http
 GET /api/sellers
 Authorization: Bearer <admin_jwt_token>
+### Seller Product Management Endpoints
+
+#### 1. Get All Seller Products
+```http
+GET /api/seller/products
+Authorization: Bearer <seller_jwt_token>
 ```
 
+**Response (200):**
+```json
+[
+  {
+    "id": 1,
+    "title": "Laptop Pro 15",
+    "description": "High-performance laptop",
+    "mrpPrice": 1299,
+    "sellingPrice": 999,
+    "discountPercentage": 23,
+    "color": "Black",
+    "size": "15inch",
+```
+
+### Seller Product Management Endpoints
+
+#### 1. Get All Seller Products
+```http
+GET /api/seller/products
+Authorization: Bearer <seller_jwt_token>
+```
+
+**Response (200):**
+```json
+[
+  {
+    "id": 1,
+    "title": "Laptop Pro 15",
 ### Product Endpoints
 
 #### 1. Get All Products with Advanced Filtering
@@ -1201,6 +1263,31 @@ Products support two types of variants:
      • Battery: Up to 20 hours
 ```
 
+## 📊 Seller Analytics & Reporting
+
+### SellerReport Features
+
+The SellerReport entity provides comprehensive financial tracking for sellers:
+
+#### Key Metrics Tracked
+
+| Metric | Description | Use Case |
+|--------|-------------|----------|
+| **Total Earnings** | Cumulative revenue from all sales | Financial reporting |
+| **Total Sales** | Number of products sold | Performance tracking |
+| **Total Refunds** | Amount refunded to customers | Refund management |
+| **Total Tax** | Tax collected on sales | Tax compliance |
+| **Net Earning** | Final amount after deductions | Profit calculation |
+| **Total Orders** | Number of completed orders | Order statistics |
+| **Cancelled Orders** | Count of cancelled transactions | Quality metrics |
+| **Total Transactions** | Financial transaction count | Audit trail |
+
+#### SellerReport Structure
+```java
+@Entity
+public class SellerReport {
+    private long id;
+    private Seller seller;          // One-to-one relationship with seller
 ## 🗄️ Database Schema
 
 ### Core Tables
@@ -1210,6 +1297,81 @@ Products support two types of variants:
 CREATE TABLE users (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   email VARCHAR(255) NOT NULL UNIQUE,
+    private Long totalEarnings;     // Revenue tracking
+    private Long totalSales;        // Sales count
+    private Long totalRefunds;      // Refund amount
+    private Long totalTax;          // Tax tracking
+    private Long netEarning;        // Final profit
+    private Integer totalOrders;    // Completed orders
+    private Integer cancelledOrders; // Cancelled orders
+    private Integer totalTransactions; // Transaction count
+}
+```
+
+## 🏠 Home Page Management
+
+### Overview
+The Home and HomeCategory entities enable dynamic configuration of the home page display without code changes.
+
+#### Features
+
+1. **Daily Best Selling Product**
+   - Automatically feature the top-selling product
+   - Dynamic updates based on sales data
+   - Drives customer attention to popular items
+
+2. **Daily Deal Product**
+   - Special promotional product rotation
+   - Time-based deal management
+   - Encourages repeat visits
+
+3. **Category Section Management**
+   - Organize categories by section (TOP, MIDDLE, BOTTOM)
+   - Multiple categories per section
+   - Responsive layout support
+
+#### Home Page Structure
+```java
+@Entity
+public class Home {
+    private long id;
+    private Product dailyBestSellingProduct;  // Best seller
+    private Product dailyDealProduct;         // Promotional product
+    private List<HomeCategory> categories;    // Category displays
+}
+
+@Entity
+public class HomeCategory {
+    private long id;
+    private Home home;
+    private Category category;
+    private HomeCategorySection section;     // TOP, MIDDLE, BOTTOM
+}
+```
+
+#### Supported Sections
+- **TOP**: Header section for premium visibility
+- **MIDDLE**: Main content area
+- **BOTTOM**: Footer section
+
+## 💳 Payment Integration
+
+### PaymentDetails Entity
+The PaymentDetails model integrates with Razorpay for payment processing:
+
+#### Supported Payment Methods
+- Credit Card
+- Debit Card
+- Net Banking
+- Wallet
+- UPI
+
+#### Payment Fields
+```java
+@Data
+public class PaymentDetails {
+    private String paymentId;                    // Internal payment ID
+    private String razorpayPaymentLinkId;       // Razorpay link ID
   password VARCHAR(255) NOT NULL,
   first_name VARCHAR(100),
   last_name VARCHAR(100),
@@ -1342,6 +1504,90 @@ CREATE TABLE verification_code (
 );
 ```
 
+#### seller_report Table (Analytics & Financial Reporting)
+```sql
+CREATE TABLE seller_report (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  seller_id BIGINT NOT NULL UNIQUE,
+  total_earnings BIGINT DEFAULT 0,
+  total_sales BIGINT DEFAULT 0,
+  total_refunds BIGINT DEFAULT 0,
+  total_tax BIGINT DEFAULT 0,
+  net_earning BIGINT DEFAULT 0,
+  total_orders INT DEFAULT 0,
+  cancelled_orders INT DEFAULT 0,
+  total_transactions INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (seller_id) REFERENCES seller(id) ON DELETE CASCADE,
+  KEY idx_seller (seller_id)
+);
+```
+
+#### transaction Table (Financial Transaction Tracking)
+```sql
+CREATE TABLE transaction (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  customer_id BIGINT NOT NULL,
+  order_id BIGINT NOT NULL,
+  seller_id BIGINT NOT NULL,
+  date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (seller_id) REFERENCES seller(id) ON DELETE CASCADE,
+  KEY idx_customer (customer_id),
+  KEY idx_seller (seller_id),
+  KEY idx_date (date)
+);
+```
+
+#### payment_details Table (Razorpay Integration)
+```sql
+CREATE TABLE payment_details (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  payment_id VARCHAR(255),
+  razorpay_payment_link_id VARCHAR(255),
+  razorpay_payment_link_reference_id VARCHAR(255),
+  razorpay_payment_link_status VARCHAR(50),
+  razorpay_payment_id_zwsp VARCHAR(255),
+  status ENUM('PENDING', 'COMPLETED', 'FAILED') DEFAULT 'PENDING',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_payment_id (payment_id),
+  KEY idx_status (status)
+);
+```
+
+#### deal Table (Promotions & Special Offers)
+```sql
+CREATE TABLE deal (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  discount_percent INT DEFAULT 0,
+  category_id BIGINT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE,
+  KEY idx_category (category_id)
+);
+```
+
+#### home Table (Home Page Configuration)
+```sql
+CREATE TABLE home (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  daily_best_selling_product_id BIGINT,
+  daily_deal_product_id BIGINT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (daily_best_selling_product_id) REFERENCES product(id) ON DELETE SET NULL,
+  FOREIGN KEY (daily_deal_product_id) REFERENCES product(id) ON DELETE SET NULL
+);
+```
+
+#### home_category Table (Home Page Category Display)
+```sql
+CREATE TABLE home_category (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
 ## 📊 Service Layer Documentation
 
 ### ProductService Implementation
@@ -1940,10 +2186,27 @@ We welcome contributions! Please follow these steps:
 
 ### Common API Calls
 
-#### 1. Create a Product (Curl)
+#### 1. Send OTP for Login/Signup (Curl)
 ```bash
-curl -X POST http://localhost:5454/api/products \
-  -H "Authorization: Bearer <jwt_token>" \
+curl -X POST http://localhost:5454/api/auth/sent/login-signup-otp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "role": "SELLER"
+  }'
+```
+
+#### 2. Get All Seller Products (Curl)
+```bash
+curl -X GET http://localhost:5454/api/seller/products \
+  -H "Authorization: Bearer <seller_jwt_token>" \
+  -H "Content-Type: application/json"
+```
+
+#### 3. Create a Product (Curl)
+```bash
+curl -X POST http://localhost:5454/api/seller/products \
+  -H "Authorization: Bearer <seller_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "MacBook Pro 16\"",
@@ -1959,28 +2222,28 @@ curl -X POST http://localhost:5454/api/products \
   }'
 ```
 
-#### 2. Get Products with Filtering (Curl)
+#### 4. Get Products with Filtering (Curl)
 ```bash
 curl -X GET "http://localhost:5454/api/products?category=laptops&minPrice=500&maxPrice=2000&sort=price_low&pageNumber=0" \
   -H "Content-Type: application/json"
 ```
 
-#### 3. Search Products (Curl)
+#### 5. Search Products (Curl)
 ```bash
 curl -X GET "http://localhost:5454/api/products/search?query=laptop" \
   -H "Content-Type: application/json"
 ```
 
-#### 4. Get Product by ID (Curl)
+#### 6. Get Product by ID (Curl)
 ```bash
 curl -X GET http://localhost:5454/api/products/1 \
   -H "Content-Type: application/json"
 ```
 
-#### 5. Update Product (Curl)
+#### 7. Update Product (Curl)
 ```bash
-curl -X PUT http://localhost:5454/api/products/1 \
-  -H "Authorization: Bearer <jwt_token>" \
+curl -X PUT http://localhost:5454/api/seller/products/1 \
+  -H "Authorization: Bearer <seller_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Updated MacBook Pro",
@@ -1989,16 +2252,10 @@ curl -X PUT http://localhost:5454/api/products/1 \
   }'
 ```
 
-#### 6. Delete Product (Curl)
+#### 8. Delete Product (Curl)
 ```bash
-curl -X DELETE http://localhost:5454/api/products/1 \
-  -H "Authorization: Bearer <jwt_token>" \
-  -H "Content-Type: application/json"
-```
-
-#### 7. Get Seller Products (Curl)
-```bash
-curl -X GET http://localhost:5454/api/sellers/1/products \
+curl -X DELETE http://localhost:5454/api/seller/products/1 \
+  -H "Authorization: Bearer <seller_jwt_token>" \
   -H "Content-Type: application/json"
 ```
 
@@ -2036,7 +2293,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+**Last Updated**: December 8, 2025  
 
 For questions, issues, or suggestions:
 - Create an issue on GitHub
