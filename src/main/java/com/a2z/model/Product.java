@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,9 +28,9 @@ public class Product {
 
     private String description;
 
-    private Double mrpPrice;
+    private Integer mrpPrice;
 
-    private Double sellingPrice;
+    private Integer sellingPrice;
 
     private int discountPercentage;
 
@@ -48,11 +49,11 @@ public class Product {
     @ManyToOne
     private Seller seller;
 
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
-    private String variant;
+    private String size;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();

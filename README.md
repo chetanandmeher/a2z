@@ -565,19 +565,200 @@ Authorization: Bearer <admin_jwt_token>
 
 ### Product Endpoints
 
-#### 1. Get All Products
+#### 1. Get All Products with Advanced Filtering
 ```http
-GET /api/products?page=0&size=10&sort=name,asc
+GET /api/products?category=electronics&colors=black&sizes=M&minPrice=100&maxPrice=1000&sort=price_low&minDiscountPercentage=10&pageNumber=0
 ```
 
+**Query Parameters:**
+- `category` - Filter by category ID (Level 3 category)
+- `colors` - Filter by product color
+- `sizes` - Filter by product size
+- `minPrice` - Minimum selling price filter
+- `maxPrice` - Maximum selling price filter
+- `sort` - Sort options: `price_low`, `price_high`
+- `minDiscountPercentage` - Minimum discount percentage
+- `stock` - Filter by stock availability
+- `pageNumber` - Page number (0-indexed)
+
+**Response (200):**
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "title": "Laptop Pro 15",
+      "description": "High-performance laptop",
+      "mrpPrice": 1299,
+      "sellingPrice": 999,
+      "discountPercentage": 23,
+      "color": "Black",
+      "size": "15inch",
+      "images": ["url1", "url2"],
+      "category": { "id": 1, "categoryId": "electronics" },
+      "seller": { "id": 1, "name": "TechStore" },
+      "createdAt": "2025-12-07T10:30:00"
+    }
+  ],
+  "totalPages": 5,
+  "totalElements": 45,
+  "currentPage": 0
+}
+```
+
+**Query Parameters:**
+- `category` - Filter by category ID (Level 3 category)
+- `colors` - Filter by product color
+- `sizes` - Filter by product size
+- `minPrice` - Minimum selling price filter
+**Response (200):**
+```json
+{
+  "id": 1,
+  "title": "Laptop Pro 15",
+  "description": "High-performance laptop with 16GB RAM",
+  "mrpPrice": 1299,
+  "sellingPrice": 999,
+  "discountPercentage": 23,
+  "quantity": 50,
+  "color": "Black",
+  "size": "15inch",
+  "images": ["url1", "url2"],
+  "numberOfReviews": 15,
+  "category": { "id": 1, "categoryId": "laptops", "level": 3 },
+  "seller": { "id": 1, "name": "TechStore" },
+  "reviews": [],
+  "createdAt": "2025-12-07T10:30:00"
+}
+```
+
+- `maxPrice` - Maximum selling price filter
+- `sort` - Sort options: `price_low`, `price_high`
+GET /api/products/search?query=laptop
+```
+
+**Response (200):**
+```json
+[
+  {
+    "id": 1,
+    "title": "Laptop Pro 15",
+    "sellingPrice": 999,
+    "discountPercentage": 23
+  },
+  {
+    "id": 2,
+    "title": "Laptop Gaming 17",
+    "sellingPrice": 1499,
+    "discountPercentage": 30
+  }
+]
+- `stock` - Filter by stock availability
+- `pageNumber` - Page number (0-indexed)
+
+**Response (200):**
+```json
+{
+  "content": [
+    {
+      "id": 1,
+  "title": "Laptop Pro 15",
+  "description": "High-performance laptop with 16GB RAM and 512GB SSD",
+  "mrpPrice": 1299,
+  "sellingPrice": 999,
+  "color": "Black",
+  "size": "15inch",
+  "images": ["url1", "url2"],
+  "category1": "electronics",
+  "category2": "computers",
+  "category3": "laptops"
+}
+```
+
+**Note:** The system supports hierarchical categories with 3 levels. If categories don't exist, they are created automatically.
+
+**Response (201):**
+```json
+{
+  "id": 1,
+  "title": "Laptop Pro 15",
+  "description": "High-performance laptop with 16GB RAM and 512GB SSD",
+  "mrpPrice": 1299,
+  "sellingPrice": 999,
+  "discountPercentage": 23,
+  "color": "Black",
+  "size": "15inch",
+      "discountPercentage": 23,
+  "category": { "id": 1, "categoryId": "laptops", "level": 3 },
+  "seller": { "id": 1, "name": "TechStore" },
+  "createdAt": "2025-12-07T10:30:00"
+      "size": "15inch",
+      "images": ["url1", "url2"],
+      "category": { "id": 1, "categoryId": "electronics" },
+      "seller": { "id": 1, "name": "TechStore" },
+      "createdAt": "2025-12-07T10:30:00"
+    }
+  ],
+  "totalPages": 5,
+  "totalElements": 45,
+  "currentPage": 0
+  "title": "Updated Laptop Pro 15",
+  "sellingPrice": 1099,
+  "mrpPrice": 1399,
+  "color": "Silver",
+  "quantity": 45
+}
+```
+
+**Response (200):**
+```json
 #### 2. Get Product by ID
 ```http
 GET /api/products/{productId}
 ```
 
+**Response (200):**
+```json
+{
+  "id": 1,
+  "title": "Laptop Pro 15",
+  "description": "High-performance laptop with 16GB RAM",
+  "mrpPrice": 1299,
+  "sellingPrice": 999,
+  "discountPercentage": 23,
+  "quantity": 50,
+  "color": "Black",
+  "size": "15inch",
+  "images": ["url1", "url2"],
+  "numberOfReviews": 15,
+  "category": { "id": 1, "categoryId": "laptops", "level": 3 },
+  "seller": { "id": 1, "name": "TechStore" },
+  "reviews": [],
+  "createdAt": "2025-12-07T10:30:00"
+}
+```
+
 #### 3. Search Products
 ```http
-GET /api/products/search?query=laptop&category=Electronics
+GET /api/products/search?query=laptop
+```
+
+**Response (200):**
+```json
+[
+  {
+    "id": 1,
+    "title": "Laptop Pro 15",
+    "sellingPrice": 999,
+    "discountPercentage": 23
+  },
+  {
+    "id": 2,
+    "title": "Laptop Gaming 17",
+    "sellingPrice": 1499,
+    "discountPercentage": 30
+  }
+]
 ```
 
 #### 4. Create Product (Seller)
@@ -587,12 +768,36 @@ Authorization: Bearer <seller_jwt_token>
 Content-Type: application/json
 
 {
-  "name": "Laptop Pro",
-  "description": "High-performance laptop",
-  "price": 999.99,
-  "category": "Electronics",
+  "title": "Laptop Pro 15",
+  "description": "High-performance laptop with 16GB RAM and 512GB SSD",
+  "mrpPrice": 1299,
+  "sellingPrice": 999,
+  "color": "Black",
+  "size": "15inch",
   "images": ["url1", "url2"],
-  "stock": 50
+  "category1": "electronics",
+  "category2": "computers",
+  "category3": "laptops"
+}
+```
+
+**Note:** The system supports hierarchical categories with 3 levels. If categories don't exist, they are created automatically.
+
+**Response (201):**
+```json
+{
+  "id": 1,
+  "title": "Laptop Pro 15",
+  "description": "High-performance laptop with 16GB RAM and 512GB SSD",
+  "mrpPrice": 1299,
+  "sellingPrice": 999,
+  "discountPercentage": 23,
+  "color": "Black",
+  "size": "15inch",
+  "images": ["url1", "url2"],
+  "category": { "id": 1, "categoryId": "laptops", "level": 3 },
+  "seller": { "id": 1, "name": "TechStore" },
+  "createdAt": "2025-12-07T10:30:00"
 }
 ```
 
@@ -603,29 +808,73 @@ Authorization: Bearer <seller_jwt_token>
 Content-Type: application/json
 
 {
-  "name": "Updated Product",
-  "price": 1099.99,
-  "stock": 45
+  "title": "Updated Laptop Pro 15",
+  "sellingPrice": 1099,
+  "mrpPrice": 1399,
+  "color": "Silver",
+  "quantity": 45
+}
+```
+
+**Response (200):**
+```json
 }
 ```
 
 #### 6. Delete Product (Seller)
 ```http
-DELETE /api/products/{productId}
-Authorization: Bearer <seller_jwt_token>
+  title VARCHAR(255) NOT NULL,
 ```
-
-### Cart Endpoints
-
-#### 1. Add to Cart
-```http
-POST /api/cart/add
+  mrp_price INT NOT NULL,
+  selling_price INT NOT NULL,
+  discount_percentage INT DEFAULT 0,
+  quantity INT DEFAULT 0,
+  color VARCHAR(100),
+  size VARCHAR(50),
+  number_of_reviews INT DEFAULT 0,
+  category_id BIGINT NOT NULL,
+  seller_id BIGINT NOT NULL,
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
+  FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE RESTRICT,
 
 {
-  "productId": 1,
-  "quantity": 2
+  KEY idx_category (category_id),
+  KEY idx_selling_price (selling_price),
+  KEY idx_discount (discount_percentage)
+);
+```
+
+#### category Table (Hierarchical Categories - 3 Levels)
+```sql
+CREATE TABLE category (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  category_id VARCHAR(100) NOT NULL,
+  level INT NOT NULL,
+  parent_category_id BIGINT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (parent_category_id) REFERENCES category(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_category_level (category_id, level),
+  KEY idx_parent (parent_category_id)
+);
+```
+
+**Category Hierarchy Example:**
+```
+Level 1 (Main): electronics
+  └─ Level 2 (Sub): computers
+      └─ Level 3 (Product Type): laptops
+```
+
+#### product_images Table
+```sql
+CREATE TABLE product_images (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  product_id BIGINT NOT NULL,
+  image_url VARCHAR(500),
+  FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
+  KEY idx_product (product_id)
 }
 ```
 
@@ -671,6 +920,285 @@ Authorization: Bearer <jwt_token>
 ```http
 PUT /api/orders/{orderId}/cancel
 Authorization: Bearer <jwt_token>
+## 📊 Service Layer Documentation
+
+### ProductService Implementation
+
+The ProductService provides comprehensive product management with advanced filtering, hierarchical category support, and automatic discount calculation.
+
+#### Key Features
+
+**1. Hierarchical Category System**
+- Three-level category structure (Level 1: Main, Level 2: Sub, Level 3: Product Type)
+- Automatic category creation if not exists
+- Parent-child relationships maintained
+
+```java
+// Example Category Hierarchy
+Level 1: electronics
+└── Level 2: computers
+    └── Level 3: laptops
+```
+
+**2. Discount Calculation**
+```java
+Discount % = ((MRP Price - Selling Price) / MRP Price) * 100
+```
+
+**Example:**
+```
+MRP Price: $1299
+Selling Price: $999
+Discount: ((1299 - 999) / 1299) * 100 = 23%
+```
+
+**3. Advanced Product Filtering**
+
+The `getAllProducts()` method supports multiple filter parameters:
+
+| Filter Parameter | Type | Description | Example |
+|-----------------|------|-------------|---------|
+| `category` | String | Level 3 category ID | "laptops" |
+| `colors` | String | Product color | "black", "silver" |
+| `sizes` | String | Product size | "M", "L", "15inch" |
+| `minPrice` | Integer | Minimum selling price | 100 |
+| `maxPrice` | Integer | Maximum selling price | 1000 |
+| `sort` | String | Sort option: `price_low`, `price_high` | "price_low" |
+| `minDiscountPercentage` | Integer | Minimum discount % | 10 |
+| `stock` | String | Stock availability | "in_stock" |
+| `pageNumber` | Integer | Page number (0-indexed) | 0 |
+
+**Example Query:**
+```bash
+GET /api/products?category=laptops&colors=black&minPrice=500&maxPrice=1500&sort=price_low&minDiscountPercentage=15&pageNumber=0
+```
+
+**4. Product Search**
+
+Full-text search across product title and description:
+
+```java
+List<Product> searchProduct(String query);
+```
+
+**5. Seller Product Management**
+
+Retrieve all products for a specific seller:
+
+```java
+List<Product> getProductsBySellerId(Long sellerId);
+```
+
+#### Method Documentation
+
+```java
+/**
+ * Creates a new product with hierarchical category support
+ * 
+ * @param request CreateProductRequest containing product details
+ * @param seller The seller who owns the product
+ * @return Created Product entity
+ * @throws IllegalArgumentException if MRP price is invalid
+ */
+public Product createProduct(CreateProductRequest request, Seller seller)
+
+/**
+ * Retrieves all products with advanced filtering and pagination
+ * 
+ * @param category Level 3 category ID
+ * @param colors Product color
+ * @param sizes Product size
+ * @param minPrice Minimum selling price
+ * @param maxPrice Maximum selling price
+ * @param sort Sorting option (price_low, price_high)
+ * @param minDiscountPercentage Minimum discount percentage
+ * @param stock Stock availability filter
+ * @param pageNumber Page number (0-indexed)
+ * @return Page<Product> with filtered results
+ */
+public Page<Product> getAllProducts(...)
+
+/**
+ * Deletes a product by ID
+ * 
+ * @param productId The product to delete
+ * @throws ProductException if product not found
+ */
+public void deleteProduct(Long productId) throws ProductException
+
+/**
+ * Updates an existing product
+ * 
+ * @param productId The product ID to update
+ * @param updatedProduct Updated product details
+ * @return Updated Product entity
+ * @throws ProductException if product not found
+ */
+public Product updateProduct(Long productId, Product updatedProduct) throws ProductException
+
+/**
+ * Finds a product by ID
+ * 
+ * @param productId The product ID
+ * @return Product entity
+ * @throws ProductException if product not found
+ */
+public Product findProductById(Long productId) throws ProductException
+
+/**
+ * Searches products by query string
+ * 
+ * @param query Search keyword
+ * @return List of matching products
+ */
+public List<Product> searchProduct(String query)
+
+/**
+ * Retrieves all products for a specific seller
+ * 
+ * @param sellerId The seller ID
+ * @return List of seller's products
+ */
+public List<Product> getProductsBySellerId(Long sellerId)
+```
+
+#### Implementation Details
+
+**Category Creation Logic:**
+```java
+// If category doesn't exist, create it
+Category category = categoryRepository.getByCategoryId(categoryId);
+if(category == null) {
+    category = Category.builder()
+            .categoryId(categoryId)
+            .level(level)
+            .parentCategory(parentCategory)
+            .build();
+    categoryRepository.save(category);
+}
+```
+
+**Filtering Using JPA Criteria API:**
+```java
+Specification<Product> spec = (root, query, criteriaBuilder) -> {
+    List<Predicate> predicates = new ArrayList<>();
+    
+    // Add predicates based on provided filters
+    if(category != null) {
+        Join<Product, Category> categoryJoin = root.join("category");
+        predicates.add(criteriaBuilder.equal(categoryJoin.get("categoryId"), category));
+    }
+    
+    if(minPrice != null) {
+        predicates.add(criteriaBuilder.greaterThanOrEqualTo(
+            root.get("sellingPrice"), minPrice
+        ));
+    }
+    
+    // ... more filters
+    
+    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+};
+```
+
+**Sorting and Pagination:**
+```java
+Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("sellingPrice").ascending());
+return productRepository.findAll(spec, pageable);
+```
+
+## 🛍️ Product Management Features
+
+### Overview
+The A2Z platform provides sellers with comprehensive product management capabilities including:
+
+- **Multi-level Category Support**: Organize products in 3-level hierarchical categories
+- **Dynamic Pricing**: Support for MRP and selling price with automatic discount calculation
+- **Advanced Filtering**: Search and filter by multiple criteria
+- **Image Management**: Store multiple product images
+- **Review System**: Customer reviews and ratings
+- **Inventory Management**: Track product quantity/stock
+- **Product Variants**: Support for color and size variants
+
+### Hierarchical Category Structure
+
+The platform uses a 3-level category hierarchy for better product organization:
+
+```
+Level 1: Main Category
+├─ Electronics
+├─ Fashion
+├─ Home & Garden
+└─ Sports
+
+Level 2: Sub Category
+├─ Electronics
+│  ├─ Smartphones
+│  ├─ Laptops
+│  └─ Tablets
+│
+└─ Fashion
+   ├─ Men's Clothing
+   ├─ Women's Clothing
+   └─ Footwear
+
+Level 3: Product Type
+├─ Laptops
+│  ├─ Gaming Laptops
+│  ├─ Business Laptops
+│  └─ Ultrabooks
+│
+└─ Smartphones
+   ├─ iPhones
+   ├─ Android Phones
+   └─ Budget Phones
+```
+
+### Pricing Strategy
+
+The platform automatically calculates discount percentage based on MRP and selling price:
+
+```
+Formula: Discount % = ((MRP Price - Selling Price) / MRP Price) × 100
+
+Examples:
+MRP: $1000, Selling Price: $800  → Discount: 20%
+MRP: $500,  Selling Price: $399  → Discount: 20.2%
+MRP: $100,  Selling Price: $99   → Discount: 1%
+```
+
+### Product Variants
+
+Products support two types of variants:
+
+1. **Size Variants**
+   - Clothing: XS, S, M, L, XL, XXL
+   - Electronics: Screen size (15inch, 17inch)
+   - Storage: Capacity (128GB, 256GB, 512GB)
+
+2. **Color Variants**
+   - Black, White, Silver, Gold, Rose Gold, Blue, Red, Green, etc.
+
+### Best Practices for Product Creation
+
+1. **Title Formatting**
+   - Keep titles concise but descriptive (50-80 characters)
+   - Include key specifications (brand, model, key features)
+   - Example: "iPhone 15 Pro 128GB Space Black" ✓
+   - Avoid: "Best Phone Ever - Get Yours Now!!!" ✗
+
+2. **Description Quality**
+   - Highlight key features and specifications
+   - Include dimensions, weight, material information
+   - Mention warranty and after-sales service
+   - Use bullet points for readability
+   - Example:
+     ```
+     iPhone 15 Pro Specifications:
+     • Display: 6.1-inch Super Retina XDR
+     • Processor: A17 Pro chip
+     • Camera: Dual 48MP + 12MP Ultra Wide
+     • Battery: Up to 20 hours
 ```
 
 ## 🗄️ Database Schema
@@ -717,21 +1245,58 @@ CREATE TABLE seller (
 ```sql
 CREATE TABLE product (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  seller_id BIGINT NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
   description TEXT,
-  price DECIMAL(12, 2) NOT NULL,
-  mrp DECIMAL(12, 2),
-  category VARCHAR(100),
-  stock INT DEFAULT 0,
-  images JSON,
-  ratings DECIMAL(3, 2),
+  mrp_price INT NOT NULL,
+  selling_price INT NOT NULL,
+  discount_percentage INT DEFAULT 0,
+  quantity INT DEFAULT 0,
+  color VARCHAR(100),
+  size VARCHAR(50),
+  number_of_reviews INT DEFAULT 0,
+  category_id BIGINT NOT NULL,
+  seller_id BIGINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE RESTRICT,
   FOREIGN KEY (seller_id) REFERENCES seller(id) ON DELETE CASCADE,
   KEY idx_seller (seller_id),
-  KEY idx_category (category),
-  KEY idx_price (price)
+  KEY idx_category (category_id),
+  KEY idx_selling_price (selling_price),
+  KEY idx_discount (discount_percentage)
+);
+```
+
+#### category Table (Hierarchical Categories - 3 Levels)
+```sql
+CREATE TABLE category (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  category_id VARCHAR(100) NOT NULL,
+  level INT NOT NULL,
+  parent_category_id BIGINT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (parent_category_id) REFERENCES category(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_category_level (category_id, level),
+  KEY idx_parent (parent_category_id)
+);
+```
+
+**Category Hierarchy Example:**
+```
+Level 1 (Main): electronics
+  └─ Level 2 (Sub): computers
+      └─ Level 3 (Product Type): laptops
+```
+
+#### product_images Table
+```sql
+CREATE TABLE product_images (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  product_id BIGINT NOT NULL,
+  image_url VARCHAR(500),
+  FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
+  KEY idx_product (product_id)
 );
 ```
 
@@ -777,6 +1342,16 @@ CREATE TABLE verification_code (
 );
 ```
 
+## 📊 Service Layer Documentation
+
+### ProductService Implementation
+
+The ProductService provides comprehensive product management with advanced filtering, hierarchical category support, and automatic discount calculation.
+
+#### Key Features
+
+**1. Hierarchical Category System**
+- Three-level category structure (Level 1: Main, Level 2: Sub, Level 3: Product Type)
 ## 🔐 Authentication & Security
 
 ### JWT Flow
@@ -1104,7 +1679,86 @@ Example: feat(auth): add OTP verification for login
 git clone https://github.com/chetanandmeher/a2z-ecommerce.git
 cd ecommerce-multivendor
 
-# 2. Create feature branch
+## ⚡ Performance Optimization
+
+### Database Indexing for Products
+
+Optimize product queries with appropriate indexes:
+
+```sql
+-- Index on frequently filtered columns
+CREATE INDEX idx_product_selling_price ON product(selling_price);
+CREATE INDEX idx_product_discount ON product(discount_percentage);
+CREATE INDEX idx_product_seller ON product(seller_id);
+CREATE INDEX idx_product_category ON product(category_id);
+
+-- Composite indexes for common filter combinations
+CREATE INDEX idx_product_category_price ON product(category_id, selling_price);
+CREATE INDEX idx_product_seller_created ON product(seller_id, created_at DESC);
+
+-- Index for search operations
+CREATE FULLTEXT INDEX idx_product_search ON product(title, description);
+```
+
+### Query Optimization Tips
+
+1. **Use Pagination**
+   - Always paginate large result sets
+   - Default page size: 10 items
+   - Reduces memory usage and improves response time
+
+2. **Avoid N+1 Query Problem**
+   ```java
+   // ✓ Good: Use join fetch
+   findAll(spec, pageable)  // JPA handles joins efficiently
+   
+   // ✗ Bad: Separate queries for each product's seller
+   for(Product p : products) {
+       Seller s = sellerRepository.findById(p.getSellerId());
+   }
+   ```
+
+3. **Cache Frequently Accessed Data**
+   ```java
+   @Cacheable("products")
+   public Product findProductById(Long id) {
+       return productRepository.findById(id).orElseThrow();
+   }
+   ```
+
+4. **Filter Early**
+   - Apply filters at database level, not application level
+   - Let Criteria API build optimal SQL
+
+5. **Lazy Load Reviews**
+   ```java
+   @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+   private List<Review> reviews;
+   ```
+
+### Response Time Benchmarks
+
+| Operation | Expected Time | Conditions |
+|-----------|---------------|-----------|
+| Create Product | < 500ms | Average product with 2 images |
+| Get Product by ID | < 50ms | With reviews lazy loaded |
+| Search (10 results) | < 100ms | Full-text search, indexed |
+| Filter (10 results) | < 150ms | Multiple filters applied |
+| Get Seller Products | < 200ms | 50+ products, paginated |
+
+### Caching Strategy
+
+```properties
+# Enable caching in application.properties
+spring.cache.type=simple
+spring.cache.cache-names=products,categories,sellers
+
+# Or use Redis for distributed cache
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+```
+
+## ⚡ Performance Optimization
 git checkout -b feature/your-feature-name
 
 # 3. Make changes and commit
@@ -1282,7 +1936,89 @@ We welcome contributions! Please follow these steps:
 3. Include error messages and stack traces
 4. Mention your environment (OS, Java version, etc.)
 
-## 📄 License
+## 🚀 Quick Reference Guide
+
+### Common API Calls
+
+#### 1. Create a Product (Curl)
+```bash
+curl -X POST http://localhost:5454/api/products \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "MacBook Pro 16\"",
+    "description": "M3 Pro chip with 18GB RAM and 512GB SSD",
+    "mrpPrice": 2499,
+    "sellingPrice": 2199,
+    "color": "Space Gray",
+    "size": "16inch",
+    "images": ["https://example.com/macbook-1.jpg"],
+    "category1": "electronics",
+    "category2": "computers",
+    "category3": "laptops"
+  }'
+```
+
+#### 2. Get Products with Filtering (Curl)
+```bash
+curl -X GET "http://localhost:5454/api/products?category=laptops&minPrice=500&maxPrice=2000&sort=price_low&pageNumber=0" \
+  -H "Content-Type: application/json"
+```
+
+#### 3. Search Products (Curl)
+```bash
+curl -X GET "http://localhost:5454/api/products/search?query=laptop" \
+  -H "Content-Type: application/json"
+```
+
+#### 4. Get Product by ID (Curl)
+```bash
+curl -X GET http://localhost:5454/api/products/1 \
+  -H "Content-Type: application/json"
+```
+
+#### 5. Update Product (Curl)
+```bash
+curl -X PUT http://localhost:5454/api/products/1 \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated MacBook Pro",
+    "sellingPrice": 2099,
+    "quantity": 45
+  }'
+```
+
+#### 6. Delete Product (Curl)
+```bash
+curl -X DELETE http://localhost:5454/api/products/1 \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json"
+```
+
+#### 7. Get Seller Products (Curl)
+```bash
+curl -X GET http://localhost:5454/api/sellers/1/products \
+  -H "Content-Type: application/json"
+```
+
+### Using Postman
+
+1. **Create New Collection**: "A2Z E-Commerce"
+2. **Add Environment Variables**:
+   - `base_url`: http://localhost:5454/api
+   - `jwt_token`: (obtained from login endpoint)
+   - `seller_id`: (your seller ID)
+
+3. **Import Sample Requests**: Save the curl commands above as Postman requests
+
+### Using Insomnia
+
+1. Import workspace from URLs
+2. Set up environment variables (same as Postman)
+3. Create requests using the examples above
+
+## 🚀 Quick Reference Guide
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
