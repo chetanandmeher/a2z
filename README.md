@@ -86,7 +86,13 @@ A modern, scalable, and production-ready Spring Boot e-commerce platform designe
 - ✅ User account management
 - ✅ Shopping cart functionality
 - ✅ Wishlist management
-- ✅ Order placement and tracking
+- ✅ **Order Management** (NEW)
+  - ✅ Place orders from cart with multiple payment methods
+  - ✅ View complete order history
+  - ✅ Track individual orders with real-time status
+  - ✅ Retrieve detailed order information
+  - ✅ Cancel orders (with refund processing)
+  - ✅ View order items with product details
 - ✅ Order history and reviews
 - ✅ Coupon/Discount application
 - ✅ Multiple delivery addresses
@@ -278,6 +284,8 @@ ecommerce-multivendor/
 │   │   │       │   ├── JWT_CONSTANT.java                  # JWT configuration constants
 │   │   │       │   ├── JwtProvider.java                   # JWT token generation and validation
 │   │   │       │   └── JwtTokenValidator.java             # JWT filter for request validation
+│   │   │       │   ├── OrderController.java               # Order management endpoints (NEW)
+│   │   │       │   ├── OrderController.java               # Order management endpoints (NEW)
 │   │   │       ├── controller/                            # REST API controllers
 │   │   │       │   ├── AuthController.java                # Authentication endpoints
 │   │   │       │   ├── UserController.java                # User management endpoints
@@ -293,8 +301,8 @@ ecommerce-multivendor/
 │   │   │       │   ├── Category.java                      # Category entity
 │   │   │       │   ├── Cart.java                          # Shopping cart entity
 │   │   │       │   ├── CartItem.java                      # Cart items
-│   │   │       │   ├── Order.java                         # Order entity
-│   │   │       │   ├── OrderItem.java                     # Order items
+│   │   │       │   ├── Order.java                         # Order entity with multi-vendor support (NEW)
+│   │   │       │   ├── OrderItem.java                     # Order items with product details (NEW)
 │   │   │       │   ├── Review.java                        # Product reviews
 │   │   │       │   ├── Address.java                       # User/Seller addresses
 │   │   │       │   ├── WishList.java                      # User wishlist
@@ -313,7 +321,8 @@ ecommerce-multivendor/
 │   │   │       │   ├── UserRepository.java
 │   │   │       │   ├── SellerRepository.java
 │   │   │       │   ├── ProductRepository.java
-│   │   │       │   ├── CartRepository.java
+│   │   │       │   ├── OrderRepository.java               # Order CRUD operations (NEW)
+│   │   │       │   ├── OrderItemRepository.java           # OrderItem CRUD operations (NEW)
 │   │   │       │   ├── OrderRepository.java
 │   │   │       │   └── ...
 │   │   │       ├── service/                               # Business logic interfaces
@@ -415,12 +424,6 @@ spring.mail.password=your_app_password  # 16-character password from Google
 
 #### For Other Providers:
 ```properties
-# SendGrid
-spring.mail.host=smtp.sendgrid.net
-spring.mail.port=587
-spring.mail.username=apikey
-spring.mail.password=SG.xxx...
-
 # Custom SMTP
 spring.mail.host=smtp.example.com
 spring.mail.port=587
@@ -937,42 +940,186 @@ CREATE TABLE product_images (
   image_url VARCHAR(500),
   FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
   KEY idx_product (product_id)
-}
+);
 ```
+
+#### orders Table (NEW - Order Management)
+```sql
+CREATE TABLE orders (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  order_id VARCHAR(50) NOT NULL UNIQUE,
+  user_id BIGINT NOT NULL,
+  seller_id BIGINT NOT NULL,
+  shipping_address_id BIGINT,
+  total_mrp_price DOUBLE DEFAULT 0,
+  total_selling_price DOUBLE DEFAULT 0,
+  discount DOUBLE DEFAULT 0,
+  order_status VARCHAR(50) DEFAULT 'PENDING',
+  total_items INT DEFAULT 0,
+  payment_status VARCHAR(50) DEFAULT 'PENDING',
+  order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deliver_date DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
+  FOREIGN KEY (shipping_address_id) REFERENCES address(id) ON DELETE SET NULL,
+  KEY idx_user (user_id),
+  KEY idx_seller (seller_id),
+  KEY idx_order_status (order_status),
+  KEY idx_order_date (order_date),
+  KEY idx_payment_status (payment_status)
+);
+```
+
+**Order Statuses:**
+- `PENDING` - Order placed, awaiting payment
+- `CONFIRMED` - Payment confirmed
+- `SHIPPED` - Order dispatched
+- `DELIVERED` - Order delivered
+- `CANCELLED` - Order cancelled
+
+#### order_items Table (NEW - Order Items Management)
+```sql
+CREATE TABLE order_item (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  order_id BIGINT NOT NULL,
+  product_id BIGINT NOT NULL,
+  size VARCHAR(50),
+  quantity INT DEFAULT 1,
+  mrp_price INT DEFAULT 0,
+  selling_price INT DEFAULT 0,
+  user_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE RESTRICT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
+  KEY idx_order (order_id),
+  KEY idx_product (product_id),
+  KEY idx_user (user_id)
+);
+```
+
+**OrderItem Attributes:**
+- `product_id` - Reference to product in order
+- `size` - Selected product size variant
+- `quantity` - Number of items ordered
+- `mrp_price` - Maximum Retail Price at time of order
+- `selling_price` - Actual selling price charged
+- `user_id` - Buyer user ID for quick reference
 
 #### 2. View Cart
 ```http
 GET /api/cart
 Authorization: Bearer <jwt_token>
 ```
-
-#### 3. Remove from Cart
-```http
-DELETE /api/cart/remove/{cartItemId}
+### Order Management Endpoints
+### Order Management Endpoints
+#### 1. Create Order (Place Order)
+#### 1. Create Order (Place Order)
 Authorization: Bearer <jwt_token>
 ```
 
-### Order Endpoints
-
-#### 1. Place Order
-```http
+Query Parameters: paymentMethod=CREDIT_CARD
+### Order Management Endpoints
+Query Parameters: paymentMethod=CREDIT_CARD
+  "address": "123 Main Street",
+  "city": "New York",
+  "state": "NY",
+  "zipCode": "10001",
+  "country": "USA"
 POST /api/orders
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
-
+**Response (200):**
+```json
 {
-  "addressId": 1,
-  "paymentMethod": "CREDIT_CARD"
+  "paymentLink": "https://payment.gateway.com/pay/xxx",
+  "paymentLinkExpirationTime": 600000
 }
 ```
+Query Parameters: paymentMethod=CREDIT_CARD
+**Supported Payment Methods:**
+- `CREDIT_CARD` - Razorpay Credit Card
+- `DEBIT_CARD` - Razorpay Debit Card
+- `UPI` - Unified Payments Interface
+- `WALLET` - Digital Wallet
 
-#### 2. Get Order History
+#### 2. Get User Order History
 ```http
-GET /api/orders
+GET /api/orders/users/order-history
 Authorization: Bearer <jwt_token>
 ```
 
-#### 3. Get Order Details
+**Response (202):**
+```json
+[
+  {
+    "id": 1,
+    "orderId": "ORD-2025-001",
+    "user": { "id": 1, "email": "user@example.com" },
+    "sellerId": 5,
+    "orderItems": [
+      {
+        "id": 1,
+        "product": { "id": 101, "title": "Laptop Pro 15" },
+        "size": "15inch",
+        "quantity": 1,
+        "mrpPrice": 1299,
+        "sellingPrice": 999
+      }
+    ],
+    "shippingAddress": {
+      "address": "123 Main Street",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001"
+    },
+    "totalMrpPrice": 1299,
+    "totalSellingPrice": 999,
+    "discount": 300,
+    "totalItems": 1,
+    "orderStatus": "CONFIRMED",
+    "paymentStatus": "COMPLETED",
+    "orderDate": "2025-12-13T10:30:00",
+    "deliverDate": "2025-12-20"
+  }
+]
+```
+
+#### 2. Get User Order History
+```http
+GET /api/orders/users/order-history
+Authorization: Bearer <jwt_token>
+```
+
+**Response (202):**
+```json
+[
+  {
+    "id": 1,
+    "orderId": "ORD-2025-001",
+    "user": { "id": 1, "email": "user@example.com" },
+    "sellerId": 5,
+    "orderItems": [
+      {
+        "id": 1,
+        "product": { "id": 101, "title": "Laptop Pro 15" },
+        "size": "15inch",
+        "quantity": 1,
+        "mrpPrice": 1299,
+        "sellingPrice": 999
+      }
+    ],
+    "shippingAddress": {
+      "address": "123 Main Street",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001"
+    },
+    "totalMrpPrice": 1299,
+    "totalSellingPrice": 999,
+    "discount": 300,
+    "totalItems": 1,
 ```http
 GET /api/orders/{orderId}
 Authorization: Bearer <jwt_token>

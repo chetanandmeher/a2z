@@ -27,13 +27,15 @@ public class OrderItem {
     @ManyToOne
     private Product product;
 
-    private String variant;
+    private String size;
 
     private int quantity;
 
-    private Double mrpPrice;
+    private int mrpPrice;
 
-    private long userId;
+    private int sellingPrice;
+
+    private Long userId;
 
 
 }

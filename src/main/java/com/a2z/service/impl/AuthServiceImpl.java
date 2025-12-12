@@ -167,8 +167,18 @@ public class AuthServiceImpl implements AuthService {
         if (userDetails == null) {
             throw new BadCredentialsException("Invalid username!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
-        String actualUsername = username.substring(SELLER_PREFIX.length());
-        VerificationCode verificationCode = verificationCodeRepository.findByEmail(actualUsername);
+
+        // check for signing prefix
+        // Normalize input username (seller prefix handling
+        final boolean isSeller = username.startsWith(SELLER_PREFIX);
+        final String actualEmail = isSeller
+                ? username.substring(SELLER_PREFIX.length())
+                : username;
+
+        log.info("Authenticating {} with email: {}", isSeller ? "seller" : "customer", actualEmail);
+
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(actualEmail);
+
         if (verificationCode == null || !verificationCode.getOtp().equals(otp)) {
             throw new BadCredentialsException("Invalid OTP");
         }

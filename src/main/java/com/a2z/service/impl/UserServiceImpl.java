@@ -38,6 +38,18 @@ public class UserServiceImpl  implements UserService {
         return user;
     }
 
+    @Override
+    public Long getUserIdFromJwt(String jwt) throws Exception {
+        String email = jwtProvider.getEmailFromJwt(jwt);
+        User user = this.findUserByEmail(email);
+        return user.getId();
+    }
+
+    @Override
+    public User findUserById(Long id) throws Exception {
+        return userRepository.findById(id).
+                orElseThrow(()-> new Exception("User not found with id: " + id));
+    }
     private UserResponseDto convertUserToUserResponseDto(User user){
         return UserResponseDto.builder()
                 .role(user.getRole())

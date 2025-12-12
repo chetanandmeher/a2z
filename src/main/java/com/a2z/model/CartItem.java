@@ -35,11 +35,11 @@ public class CartItem {
 
     private int quantity = 1;
 
-    private Double sellingPrice;
+    private Integer sellingPrice;
 
-    private Double mrpPrice;
+    private Integer mrpPrice;
 
-    private long userId;
+    private Long userId;
 
 
 }

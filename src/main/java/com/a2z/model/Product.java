@@ -1,5 +1,6 @@
 package com.a2z.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,6 +48,7 @@ public class Product {
     private Category category;
 
     @ManyToOne
+    @JsonIgnore
     private Seller seller;
 
     private LocalDateTime createdAt;
@@ -57,7 +59,5 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
-
-
 
 }

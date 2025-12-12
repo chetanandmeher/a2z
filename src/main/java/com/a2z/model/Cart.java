@@ -15,7 +15,6 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 public class Cart {
 
     @Id
@@ -28,9 +27,9 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<CartItem> cartItems = new HashSet<>();
 
-    private Double totalSellingPrice;
+    private Integer totalSellingPrice;
 
-    private Double totalMrpPrice;
+    private Integer totalMrpPrice;
 
     private int totalItems;
 

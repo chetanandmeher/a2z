@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutionException;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/seller/products")
+@RequestMapping("api/sellers/products")
 public class SellerProductController {
 
     private final SellerService sellerService;
