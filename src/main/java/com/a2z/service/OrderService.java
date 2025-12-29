@@ -16,7 +16,7 @@ public interface OrderService {
      Set<Order> createOrder(Long userId, Address shippingAddress, Cart cart) throws Exception;
      Order findOrderById(Long orderId) throws Exception;
      List<Order> getUserOrderHistory(Long userId);
-     List<Order> sellerOrder(Long sellerId);
+     List<Order> getSellerOrdersBySellerId(Long sellerId);
      Order  updateOrderStatus(Long orderId, OrderStatus orderStatus) throws Exception;
      Order cancleOrder(Long orderId, Long userId) throws Exception;
      OrderItem findOrderItemByOrderItemId(Long orderItemId) throws Exception;

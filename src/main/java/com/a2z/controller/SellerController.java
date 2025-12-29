@@ -11,6 +11,7 @@ import com.a2z.request.LoginRequest;
 import com.a2z.response.AuthResponse;
 import com.a2z.service.AuthService;
 import com.a2z.service.EmailService;
+import com.a2z.service.SellerReportService;
 import com.a2z.service.SellerService;
 import com.a2z.utils.OtpUtil;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class SellerController {
     private final VerificationCodeRepository verificationCodeRepository;
     private final SellerService sellerService;
     private final EmailService emailService;
+    private final SellerReportService  sellerReportService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller(
@@ -112,9 +114,13 @@ public class SellerController {
     }
 
     @GetMapping("/report")
-    public ResponseEntity<SellerReport> getSellerReport() {
+    public ResponseEntity<SellerReport> getSellerReport(
+            @RequestHeader("Authorization") String jwt
+    ) throws SellerException{
         // Implementation for generating seller report goes here
-        return null;
+        Seller seller = sellerService.getSellerProfileByJwt(jwt);
+        SellerReport sellerReport = sellerReportService.getSellerReportBySellerId(seller.getId());
+        return ResponseEntity.ok(sellerReport);
     }
 
     @GetMapping()

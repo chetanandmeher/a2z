@@ -3,11 +3,10 @@ package com.a2z.controller;
 
 import com.a2z.enums.PaymentMethod;
 import com.a2z.model.*;
+import com.a2z.repository.PaymentOrderRepository;
 import com.a2z.response.PaymentLinkResponse;
-import com.a2z.service.CartService;
-import com.a2z.service.OrderService;
-import com.a2z.service.SellerService;
-import com.a2z.service.UserService;
+import com.a2z.service.*;
+import com.razorpay.PaymentLink;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +26,9 @@ public class OrderController {
     private final CartService cartService;
     private final OrderService orderService;
     private final SellerService sellerService;
+    private final SellerReportService sellerReportService;
+    private final PaymentService paymentService;
+    private final PaymentOrderRepository paymentOrderRepository;
 
     @PostMapping()
     public ResponseEntity<PaymentLinkResponse> createOrderHandler(
@@ -37,8 +39,25 @@ public class OrderController {
         Long userId = userService.getUserIdFromJwt(jwt);
         Cart cart = cartService.findCartByUserId(userId);
         Set<Order> orders = orderService.createOrder(userId, shippingAddress, cart);
+        User user = userService.findUserById(userId);
+        PaymentOrder paymentOrder = paymentService.createOrder(user, orders);
 
         PaymentLinkResponse paymentLinkResponse = new PaymentLinkResponse();
+        if(PaymentMethod.RAZORPAY.equals(paymentMethod)){
+            PaymentLink paymentLink = paymentService.createRazorpayPaymentLink(
+                    user,
+                    paymentOrder.getAmount(),
+                    paymentOrder.getId());
+            String paymentUrl = paymentLink.get("short_url");
+            String paymentUrlId = paymentLink.get("id");
+
+            paymentLinkResponse.setPaymentLinkUrl(paymentUrl);
+
+            paymentOrder.setPaymentLinkId(paymentUrlId);
+            paymentOrderRepository.save(paymentOrder);
+        }
+
+
         return ResponseEntity.ok(paymentLinkResponse);
 
     }
@@ -88,6 +107,11 @@ public class OrderController {
         if(!order.getUser().getId().equals(userId)) {
             throw new Exception("You do not have access to this order");
         }
+
+        SellerReport sellerReport = sellerReportService.getSellerReportBySellerId(order.getSellerId());
+        sellerReport.setCancelledOrders(sellerReport.getCancelledOrders()+1);
+        sellerReport.setTotalRefunds(sellerReport.getTotalRefunds() + order.getTotalSellingPrice());
+
 
         return ResponseEntity.ok(order);
     }

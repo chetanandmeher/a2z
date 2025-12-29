@@ -43,11 +43,11 @@ public class Order {
     @Embedded
     private PaymentDetails paymentDetails;
 
-    private double totalMrpPrice;
+    private Long totalMrpPrice;
 
-    private double totalSellingPrice;
+    private Long totalSellingPrice;
 
-    private double discount;
+    private long discount;
 
     private OrderStatus orderStatus;
 

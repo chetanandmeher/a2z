@@ -104,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> sellerOrder(Long sellerId) {
+    public List<Order> getSellerOrdersBySellerId(Long sellerId) {
         return orderRepository.getAllBySellerId(sellerId);
 
     }

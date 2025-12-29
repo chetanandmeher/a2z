@@ -26,7 +26,7 @@ public class SellerReport {
 
     private Long totalSales = 0L;
 
-    private Long totalRefunds = 0L;
+    private Double totalRefunds = 0D;
 
     private Long totalTax = 0L;
 
