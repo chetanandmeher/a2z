@@ -5,8 +5,10 @@ import com.a2z.response.ApiResponse;
 import com.a2z.response.PaymentLinkResponse;
 import com.a2z.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class PaymentController {
             @PathVariable String paymentId,
             @PathVariable String paymentLinkId,
             @RequestHeader("Authorization") String jwt
-    ) throws Exception{
+    ) throws Exception {
         Long user = userService.getUserIdFromJwt(jwt);
 
         PaymentLinkResponse paymentLinkResponse;
@@ -39,22 +41,22 @@ public class PaymentController {
                         paymentId,
                         paymentLinkId
                 );
-        if(paymentSuccess){
-            for(Order order:paymentOrder.getOrders()){
+        if (paymentSuccess) {
+            for (Order order : paymentOrder.getOrders()) {
                 transactionService.createTransaction(order);
                 Seller seller = sellerService.getSellerById(order.getSellerId());
                 SellerReport sellerReport = sellerReportService
                         .getSellerReportBySellerId(seller.getId());
-                sellerReport.setTotalOrders(sellerReport.getTotalOrders()+1);
-                sellerReport.setTotalEarnings(sellerReport.getTotalEarnings()+order.getTotalSellingPrice());
-                sellerReport.setTotalSales(sellerReport.getTotalSales()+order.getOrderItems().size());
-                sellerReportService.updateSellerReport(sellerReport.getId(),sellerReport);
+                sellerReport.setTotalOrders(sellerReport.getTotalOrders() + 1);
+                sellerReport.setTotalEarnings(sellerReport.getTotalEarnings() + order.getTotalSellingPrice());
+                sellerReport.setTotalSales(sellerReport.getTotalSales() + order.getOrderItems().size());
+                sellerReportService.updateSellerReport(sellerReport.getId(), sellerReport);
 
             }
         }
         ApiResponse response = ApiResponse.builder()
                 .message("Payment processed successfully")
                 .build();
-        return ResponseEntity.created().body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

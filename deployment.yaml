@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: springboot
+  template:
+    metadata:
+      labels:
+        app: springboot
+    spec:
+      containers:
+        - name: springboot
+          image: us-central1-docker.pkg.dev/skilled-anthem-472810-u9/springboot-repo/springboot-app@sha256:48bb28e7987b509b65328c75603a70add446069f43b3099dbc39b759390d1f8a
+          ports:
+            - containerPort: 8080

@@ -66,7 +66,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart findCartByUserId(Long userId) {
-        Cart cart = cartRepository.findByUser_Id(userId);
+        Cart cart = cartRepository.findByUserId(userId);
         int totalPrice = 0;
         int totalDiscountPrice = 0;
         int totalItem = 0;

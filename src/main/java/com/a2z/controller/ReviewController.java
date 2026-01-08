@@ -57,9 +57,8 @@ public class ReviewController {
     ) throws  Exception{
         Long userId = userService.getUserIdFromJwt(jwt);
         reviewService.deleteReview(reviewId, userId);
-        ApiResponse response = ApiResponse().builder()
+        ApiResponse response = ApiResponse.builder()
                 .message("Review deleted successfully")
-                .success(true)
                 .build();
         return ResponseEntity.ok(response);
     }
