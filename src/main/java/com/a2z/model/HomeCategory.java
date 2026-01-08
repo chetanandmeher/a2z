@@ -16,6 +16,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class HomeCategory {
 
     @Id
